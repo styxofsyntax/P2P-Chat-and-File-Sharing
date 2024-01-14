@@ -118,11 +118,11 @@ void Server::recvFromClient(client_ctx c_ctx)
                 pdata.ip = inet_ntoa(c_addr.sin_addr);
 
                 // If username is not present in database
-                peers[username] = pdata;
                 if (peers.find(username) == peers.end())
                     data = "OK"; // user registered
                 else
                     data = "UP"; // data updated
+                peers[username] = pdata;
 
                 send(connfd, data.c_str(), data.size(), 0);
                 printPeers();
@@ -138,6 +138,7 @@ void Server::recvFromClient(client_ctx c_ctx)
                     peers.erase(it);
                     cout << "Username " << exitUsername << " removed.\n\n";
                 }
+                continue;
             }
 
             string data;

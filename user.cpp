@@ -15,7 +15,8 @@ int main()
         {
         }
         int op;
-        std::cout << "Choose option:\n1. View Users\n2. Select User\n3. View All Files\n0. Exit\n";
+        std::cout << ANSI_COLOR_BLUE << "Choose option:\n1. View Users\n2. Select User\n3. View All Files\n0. Exit\n"
+                  << ANSI_COLOR_RESET;
         std::cin >> op;
         std::cout << "\n";
         if (std::cin.fail())
@@ -94,7 +95,8 @@ void userSelect(Client &clientObj)
 
         int op;
         std::cout << "---Selected User: " << username << "---\n";
-        std::cout << "Choose option:\n1. View IP/Port\n2. View Filenames\n3. Chat\n4. Fetch File\n0. Exit\n";
+        std::cout << ANSI_COLOR_BLUE << "Choose option:\n1. View IP/Port\n2. View Filenames\n3. Chat\n4. Fetch File\n0. Exit\n"
+                  << ANSI_COLOR_RESET;
         std::cin >> op;
         std::cout << std::endl;
 

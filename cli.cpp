@@ -104,9 +104,6 @@ bool Client::serverRegister()
         return false;
     }
 
-    cout << "Shared files: ";
-    printVector(files);
-
     string data = "INIT," + username + ',' + dir + ',' + to_string(this->port) + ',' + filesToString();
     send(fd, data.c_str(), data.size(), 0);
 
@@ -118,7 +115,8 @@ bool Client::serverRegister()
         vector<string> tokens = stringToTokens(buffer);
 
         if (strcmp(buffer, "OK") == 0)
-            cout << "Registered with server!\n\n";
+            cout << ANSI_COLOR_GREEN "Registered with server!\n\n"
+                 << ANSI_COLOR_RESET;
         else if (strcmp(buffer, "UP") == 0)
             cout << "Filenames updated on server!\n\n";
         else if (tokens.size() == 2 && tokens[0] == "ERR")
@@ -315,14 +313,18 @@ void Client::peerChat(string username)
     thread recvThread([this, fd]()
                       { this->recvChatFromPeer(fd); });
 
-    string flag = "CHAT";
+    cout << ANSI_COLOR_GREEN << "Chat session opened with " << username << '\n'
+         << ANSI_COLOR_RESET;
+
+    string flag = "CHAT," + this->username;
     send(fd, flag.c_str(), flag.size(), 0);
 
     recvThread.join();
     sendPeerThread.join();
     close(fd);
 
-    cout << "Chat session closed!\n\n";
+    cout << ANSI_COLOR_YELLOW << "Chat session closed!\n\n"
+         << ANSI_COLOR_RESET;
 }
 
 bool Client::startChatServer()
@@ -390,7 +392,8 @@ void Client::invokeAccept(int fd)
 
                 if (tokens[0] == "CHAT")
                 {
-                    cout << "Enter 9 to accept the chat request! (5 secs)\n";
+                    cout << ANSI_COLOR_CYAN << "Enter 9 to accept the chat request! (5 secs)\n"
+                         << ANSI_COLOR_RESET;
                     chatSession = true;
                     auto startTime = std::chrono::steady_clock::now();
                     do
@@ -400,7 +403,8 @@ void Client::invokeAccept(int fd)
 
                         if (elapsedTime >= 5)
                         {
-                            std::cout << "Chat request denied.\n\n";
+                            std::cout << ANSI_COLOR_RED << "Chat request denied.\n\n"
+                                      << ANSI_COLOR_RESET;
                             shutdown(connfd, 2);
                             break;
                         }
@@ -415,6 +419,9 @@ void Client::invokeAccept(int fd)
                         continue; // declines the chat request
                     }
 
+                    cout << ANSI_COLOR_GREEN << "Chat session opened with " << tokens[1] << '\n'
+                         << ANSI_COLOR_RESET;
+
                     thread recvChatThread = thread([this, connfd]()
                                                    { this->recvChatFromPeer(connfd); });
                     thread sendChatThread = thread([this, connfd]()
@@ -428,7 +435,8 @@ void Client::invokeAccept(int fd)
                     catch (exception e)
                     {
                     }
-                    cout << "Chat session closed!\n\n";
+                    cout << ANSI_COLOR_YELLOW << "Chat session closed!\n\n"
+                         << ANSI_COLOR_RESET;
                     blockUI = false;
                 }
                 else if (tokens[0] == "FILE")
@@ -514,7 +522,9 @@ void Client::recvChatFromPeer(int connfd)
         }
         else
         {
-            cout << "Peer disconnected. Enter anything to exit!\n\n";
+            if (chatSession)
+                cout << ANSI_COLOR_RED << "Peer disconnected. Enter anything to exit!\n"
+                     << ANSI_COLOR_RESET;
             chatSession = false;
             break;
         }
@@ -524,8 +534,6 @@ void Client::recvChatFromPeer(int connfd)
 void Client::sendChatToPeer(int connfd)
 {
     char buffer[1000];
-
-    cout << "Enter Message : ";
     while (chatSession)
     {
         cin.getline(buffer, 1000);
